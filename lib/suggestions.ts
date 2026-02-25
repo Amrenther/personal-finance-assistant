@@ -68,7 +68,7 @@ export function generateSuggestions(
       suggestions.push({
         type: "destructive",
         title: `${budget.category} over budget`,
-        description: `You've spent $${spent.toFixed(2)} on ${budget.category} this month, exceeding your $${Number(budget.monthly_limit).toFixed(2)} budget by $${(spent - Number(budget.monthly_limit)).toFixed(2)}.`,
+        description: `You've spent \u20B9${Math.round(spent).toLocaleString("en-IN")} on ${budget.category} this month, exceeding your \u20B9${Math.round(Number(budget.monthly_limit)).toLocaleString("en-IN")} budget by \u20B9${Math.round(spent - Number(budget.monthly_limit)).toLocaleString("en-IN")}.`,
       })
     }
   }
@@ -81,7 +81,7 @@ export function generateSuggestions(
       suggestions.push({
         type: "warning",
         title: `${budget.category} nearing budget limit`,
-        description: `You've used ${Math.round(ratio * 100)}% of your ${budget.category} budget ($${spent.toFixed(2)} of $${Number(budget.monthly_limit).toFixed(2)}). Consider slowing down.`,
+        description: `You've used ${Math.round(ratio * 100)}% of your ${budget.category} budget (\u20B9${Math.round(spent).toLocaleString("en-IN")} of \u20B9${Math.round(Number(budget.monthly_limit)).toLocaleString("en-IN")}). Consider slowing down.`,
       })
     }
   }
@@ -106,7 +106,7 @@ export function generateSuggestions(
         suggestions.push({
           type: "info",
           title: `${category} spending increased`,
-          description: `Your ${category} spending is up ${Math.round(increase)}% compared to last month ($${previous.toFixed(2)} to $${current.toFixed(2)}).`,
+          description: `Your ${category} spending is up ${Math.round(increase)}% compared to last month (\u20B9${Math.round(previous).toLocaleString("en-IN")} to \u20B9${Math.round(current).toLocaleString("en-IN")}).`,
         })
       }
     }
@@ -118,7 +118,7 @@ export function generateSuggestions(
     suggestions.push({
       type: "success",
       title: "You're saving money!",
-      description: `Great job! You have $${savings.toFixed(2)} in net savings this month. Consider setting aside some for an emergency fund.`,
+      description: `Great job! You have \u20B9${Math.round(savings).toLocaleString("en-IN")} in net savings this month. Consider setting aside some for an emergency fund.`,
     })
   }
 

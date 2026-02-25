@@ -38,7 +38,7 @@ const ALL_CATEGORIES = [
 ]
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value)
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value)
 }
 
 type Props = {
@@ -163,7 +163,7 @@ export function BudgetsSection({ budgets: initialBudgets, categoryBreakdown }: P
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="budget-limit">Monthly Limit ($)</Label>
+                <Label htmlFor="budget-limit">{"Monthly Limit (\u20B9)"}</Label>
                 <Input
                   id="budget-limit"
                   type="number"

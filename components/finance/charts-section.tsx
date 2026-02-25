@@ -89,11 +89,11 @@ export function ChartsSection({ monthlyStats, categoryBreakdown }: Props) {
                 <BarChart data={monthlyStats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="month" tickFormatter={formatMonth} fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
+                  <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `\u20B9${Number(v).toLocaleString("en-IN")}`} />
                   <ChartTooltip
                     content={
                       <ChartTooltipContent
-                        formatter={(value) => `$${Number(value).toLocaleString()}`}
+                        formatter={(value) => `\u20B9${Number(value).toLocaleString("en-IN")}`}
                       />
                     }
                   />
@@ -123,7 +123,7 @@ export function ChartsSection({ monthlyStats, categoryBreakdown }: Props) {
                       <ChartTooltip
                         content={
                           <ChartTooltipContent
-                            formatter={(value) => `$${Number(value).toFixed(2)}`}
+                            formatter={(value) => `\u20B9${Number(value).toLocaleString("en-IN")}`}
                           />
                         }
                       />
@@ -175,11 +175,11 @@ export function ChartsSection({ monthlyStats, categoryBreakdown }: Props) {
               <LineChart data={monthlyStats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="month" tickFormatter={formatMonth} fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
+                <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `\u20B9${Number(v).toLocaleString("en-IN")}`} />
                 <ChartTooltip
                   content={
                     <ChartTooltipContent
-                      formatter={(value) => `$${Number(value).toLocaleString()}`}
+                      formatter={(value) => `\u20B9${Number(value).toLocaleString("en-IN")}`}
                     />
                   }
                 />

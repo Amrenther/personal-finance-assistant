@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { TrendingUp, TrendingDown, DollarSign, CalendarDays, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { TrendingUp, TrendingDown, IndianRupee, CalendarDays, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import type { Transaction } from "@/app/actions"
 
 type OverviewProps = {
@@ -12,9 +12,10 @@ type OverviewProps = {
 }
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
+    currency: "INR",
+    maximumFractionDigits: 0,
   }).format(value)
 }
 
@@ -48,7 +49,7 @@ export function OverviewSection({
     {
       title: "Net Balance",
       value: formatCurrency(netBalance),
-      icon: DollarSign,
+      icon: IndianRupee,
       iconColor: "text-blue-600",
       bgColor: "bg-blue-50",
     },

@@ -49,7 +49,7 @@ const EXPENSE_CATEGORIES = [
 const INCOME_CATEGORIES = ["Salary", "Freelance", "Gifts", "Investments", "Other"]
 
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value)
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value)
 }
 
 function formatDate(dateStr: string) {
@@ -185,7 +185,7 @@ export function TransactionsSection({ transactions: initialTransactions }: Props
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount ($)</Label>
+                <Label htmlFor="amount">{"Amount (\u20B9)"}</Label>
                 <Input
                   id="amount"
                   type="number"
