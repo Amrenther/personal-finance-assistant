@@ -32,25 +32,8 @@ export type CategoryBreakdown = {
   total: number
 }
 
-export async function getTransactions(
-  filter?: { type?: string; category?: string }
-): Promise<Transaction[]> {
-  let query = "SELECT * FROM transactions"
-  const conditions: string[] = []
-
-  if (filter?.type && filter.type !== "all") {
-    conditions.push(`type = '${filter.type}'`)
-  }
-  if (filter?.category && filter.category !== "all") {
-    conditions.push(`category = '${filter.category}'`)
-  }
-
-  if (conditions.length > 0) {
-    query += " WHERE " + conditions.join(" AND ")
-  }
-  query += " ORDER BY date DESC, created_at DESC"
-
-  const rows = await sql(query)
+export async function getTransactions(): Promise<Transaction[]> {
+  const rows = await sql`SELECT * FROM transactions ORDER BY date DESC, created_at DESC`
   return rows as Transaction[]
 }
 
