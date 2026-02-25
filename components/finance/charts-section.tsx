@@ -15,7 +15,6 @@ import {
   LineChart,
   Pie,
   PieChart,
-  ResponsiveContainer,
   XAxis,
   YAxis,
 } from "recharts"
@@ -85,22 +84,20 @@ export function ChartsSection({ monthlyStats, categoryBreakdown }: Props) {
           </CardHeader>
           <CardContent>
             <ChartContainer config={barChartConfig} className="aspect-[4/3] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyStats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="month" tickFormatter={formatMonth} fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `\u20B9${Number(v).toLocaleString("en-IN")}`} />
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        formatter={(value) => `\u20B9${Number(value).toLocaleString("en-IN")}`}
-                      />
-                    }
-                  />
-                  <Bar dataKey="income" fill={INCOME_COLOR} radius={[4, 4, 0, 0]} maxBarSize={40} />
-                  <Bar dataKey="expenses" fill={EXPENSE_COLOR} radius={[4, 4, 0, 0]} maxBarSize={40} />
-                </BarChart>
-              </ResponsiveContainer>
+              <BarChart data={monthlyStats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="month" tickFormatter={formatMonth} fontSize={12} tickLine={false} axisLine={false} />
+                <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `\u20B9${Number(v).toLocaleString("en-IN")}`} />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={(value) => `\u20B9${Number(value).toLocaleString("en-IN")}`}
+                    />
+                  }
+                />
+                <Bar dataKey="income" fill={INCOME_COLOR} radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="expenses" fill={EXPENSE_COLOR} radius={[4, 4, 0, 0]} maxBarSize={40} />
+              </BarChart>
             </ChartContainer>
           </CardContent>
         </Card>
@@ -118,32 +115,30 @@ export function ChartsSection({ monthlyStats, categoryBreakdown }: Props) {
             ) : (
               <div className="flex flex-col items-center gap-4">
                 <ChartContainer config={pieChartConfig} className="aspect-square w-full max-w-[280px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <ChartTooltip
-                        content={
-                          <ChartTooltipContent
-                            formatter={(value) => `\u20B9${Number(value).toLocaleString("en-IN")}`}
-                          />
-                        }
-                      />
-                      <Pie
-                        data={pieData}
-                        dataKey="total"
-                        nameKey="category"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
-                        strokeWidth={2}
-                        stroke="var(--background)"
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
+                  <PieChart>
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent
+                          formatter={(value) => `\u20B9${Number(value).toLocaleString("en-IN")}`}
+                        />
+                      }
+                    />
+                    <Pie
+                      data={pieData}
+                      dataKey="total"
+                      nameKey="category"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      strokeWidth={2}
+                      stroke="var(--background)"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                  </PieChart>
                 </ChartContainer>
                 <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
                   {pieData.map((item) => (
@@ -171,28 +166,26 @@ export function ChartsSection({ monthlyStats, categoryBreakdown }: Props) {
         </CardHeader>
         <CardContent>
           <ChartContainer config={lineChartConfig} className="aspect-[3/1] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyStats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="month" tickFormatter={formatMonth} fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `\u20B9${Number(v).toLocaleString("en-IN")}`} />
-                <ChartTooltip
-                  content={
-                    <ChartTooltipContent
-                      formatter={(value) => `\u20B9${Number(value).toLocaleString("en-IN")}`}
-                    />
-                  }
-                />
-                <Line
-                  type="monotone"
-                  dataKey="expenses"
-                  stroke={TREND_COLOR}
-                  strokeWidth={2}
-                  dot={{ fill: TREND_COLOR, r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <LineChart data={monthlyStats} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="month" tickFormatter={formatMonth} fontSize={12} tickLine={false} axisLine={false} />
+              <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `\u20B9${Number(v).toLocaleString("en-IN")}`} />
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    formatter={(value) => `\u20B9${Number(value).toLocaleString("en-IN")}`}
+                  />
+                }
+              />
+              <Line
+                type="monotone"
+                dataKey="expenses"
+                stroke={TREND_COLOR}
+                strokeWidth={2}
+                dot={{ fill: TREND_COLOR, r: 4 }}
+                activeDot={{ r: 6 }}
+              />
+            </LineChart>
           </ChartContainer>
         </CardContent>
       </Card>
