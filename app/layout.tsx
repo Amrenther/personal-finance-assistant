@@ -22,7 +22,7 @@ export const metadata: Metadata = {
         media: '(prefers-color-scheme: dark)',
       },
       {
-        url: '/icon.jpg',
+        url: '/icon.png',
         type: 'image/jpeg',
       },
     ],
