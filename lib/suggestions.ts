@@ -68,7 +68,7 @@ export function generateSuggestions(
       suggestions.push({
         type: "destructive",
         title: `${budget.category} over budget`,
-        description: `You've spent \u20B9${Math.round(spent).toLocaleString("en-IN")} on ${budget.category} this month, exceeding your \u20B9${Math.round(Number(budget.monthly_limit)).toLocaleString("en-IN")} budget by \u20B9${Math.round(spent - Number(budget.monthly_limit)).toLocaleString("en-IN")}.`,
+        description: `You've spent ₹${Math.round(spent).toLocaleString("en-IN")} on ${budget.category} this month, exceeding your ₹${Math.round(Number(budget.monthly_limit)).toLocaleString("en-IN")} budget by ₹${Math.round(spent - Number(budget.monthly_limit)).toLocaleString("en-IN")}.`,
       })
     }
   }
@@ -81,7 +81,7 @@ export function generateSuggestions(
       suggestions.push({
         type: "warning",
         title: `${budget.category} nearing budget limit`,
-        description: `You've used ${Math.round(ratio * 100)}% of your ${budget.category} budget (\u20B9${Math.round(spent).toLocaleString("en-IN")} of \u20B9${Math.round(Number(budget.monthly_limit)).toLocaleString("en-IN")}). Consider slowing down.`,
+        description: `You've used ${Math.round(ratio * 100)}% of your ${budget.category} budget (₹${Math.round(spent).toLocaleString("en-IN")} of ₹${Math.round(Number(budget.monthly_limit)).toLocaleString("en-IN")}). Consider slowing down.`,
       })
     }
   }
@@ -106,7 +106,7 @@ export function generateSuggestions(
         suggestions.push({
           type: "info",
           title: `${category} spending increased`,
-          description: `Your ${category} spending is up ${Math.round(increase)}% compared to last month (\u20B9${Math.round(previous).toLocaleString("en-IN")} to \u20B9${Math.round(current).toLocaleString("en-IN")}).`,
+          description: `Your ${category} spending is up ${Math.round(increase)}% compared to last month (₹${Math.round(previous).toLocaleString("en-IN")} to ₹${Math.round(current).toLocaleString("en-IN")}).`,
         })
       }
     }
@@ -118,20 +118,102 @@ export function generateSuggestions(
     suggestions.push({
       type: "success",
       title: "You're saving money!",
-      description: `Great job! You have \u20B9${Math.round(savings).toLocaleString("en-IN")} in net savings this month. Consider setting aside some for an emergency fund.`,
+      description: `Great job! You have ₹${Math.round(savings).toLocaleString("en-IN")} in net savings this month. Consider setting aside some for an emergency fund.`,
     })
   }
 
   // Rule 6: Expense categories without budgets
   const budgetedCategories = new Set(budgets.map((b) => b.category))
-  const unbugeted = Object.keys(currentSpending).filter(
+  const unbudgeted = Object.keys(currentSpending).filter(
     (c) => !budgetedCategories.has(c)
   )
-  if (unbugeted.length > 0) {
+  if (unbudgeted.length > 0) {
     suggestions.push({
       type: "info",
       title: "Categories without budgets",
-      description: `Consider setting budgets for: ${unbugeted.join(", ")}. This helps you track and control spending.`,
+      description: `Consider setting budgets for: ${unbudgeted.join(", ")}. This helps you track and control spending.`,
+    })
+  }
+
+  // Rule 7: Recurring expense detection
+  const recurringTransactions = transactions.filter((t) => t.type === "expense" && t.date.startsWith(currentMonth))
+  const recurringByCategory: Record<string, number> = {}
+  for (const t of recurringTransactions) {
+    recurringByCategory[t.category] = (recurringByCategory[t.category] || 0) + Number(t.amount)
+  }
+  const recurringTotal = Object.values(recurringByCategory).reduce((sum, v) => sum + v, 0)
+  if (recurringTotal > 0 && totalExpenses > 0 && recurringTotal / totalExpenses > 0.5) {
+    suggestions.push({
+      type: "info",
+      title: "High recurring expenses",
+      description: `Recurring expenses make up ${Math.round((recurringTotal / totalExpenses) * 100)}% of your spending this month. Review subscriptions and recurring bills for potential savings.`,
+    })
+  }
+
+  // Rule 8: Budget overspend alert by percentage (early warning)
+  for (const budget of budgets) {
+    const spent = currentSpending[budget.category] || 0
+    const ratio = spent / Number(budget.monthly_limit)
+    if (ratio > 0.9 && ratio <= 1.0) {
+      suggestions.push({
+        type: "warning",
+        title: `${budget.category} almost at limit`,
+        description: `You've used ${Math.round(ratio * 100)}% of your ${budget.category} budget. Only ₹${Math.round(Number(budget.monthly_limit) - spent).toLocaleString("en-IN")} remains this month.`,
+      })
+    }
+  }
+
+  // Rule 9: Savings rate calculation
+  if (totalIncome > 0) {
+    const savingsRate = (totalIncome - totalExpenses) / totalIncome
+    if (savingsRate >= 0.3) {
+      suggestions.push({
+        type: "success",
+        title: "Excellent savings rate",
+        description: `You're saving ${Math.round(savingsRate * 100)}% of your income this month. Great financial discipline!`,
+      })
+    } else if (savingsRate < 0.1) {
+      suggestions.push({
+        type: "warning",
+        title: "Low savings rate",
+        description: `You're only saving ${Math.round(savingsRate * 100)}% of your income. Consider setting a goal to save at least 10% each month.`,
+      })
+    }
+  }
+
+  // Rule 10: Spending velocity (spending faster than last month)
+  const currentDays = new Date().getDate()
+  const currentMonthToDate = totalExpenses
+  const previousMonthToDate = Object.values(previousSpending).reduce((sum, v) => sum + v, 0)
+  if (previousMonthToDate > 0 && currentMonthToDate > previousMonthToDate * 1.15) {
+    const increase = Math.round(((currentMonthToDate - previousMonthToDate) / previousMonthToDate) * 100)
+    suggestions.push({
+      type: "warning",
+      title: "Spending faster than last month",
+      description: `You're spending ${increase}% more than at this point last month. Consider reviewing your recent purchases to stay on track.`,
+    })
+  }
+
+  // Rule 11: Top category comparison month-over-month
+  const currentTopCategory = Object.entries(currentSpending).sort((a, b) => b[1] - a[1])[0]
+  const previousTopCategory = Object.entries(previousSpending).sort((a, b) => b[1] - a[1])[0]
+  if (currentTopCategory && previousTopCategory && currentTopCategory[0] === previousTopCategory[0]) {
+    const change = ((currentTopCategory[1] - previousTopCategory[1]) / previousTopCategory[1]) * 100
+    if (Math.abs(change) >= 15) {
+      suggestions.push({
+        type: change > 0 ? "info" : "success",
+        title: `${currentTopCategory[0]} spending ${change > 0 ? "increased" : "decreased"}`,
+        description: `Your ${currentTopCategory[0]} spending ${change > 0 ? "increased" : "decreased"} by ${Math.round(Math.abs(change))}% compared to last month.`,
+      })
+    }
+  }
+
+  // Rule 12: No income recorded
+  if (totalIncome === 0 && totalExpenses > 0) {
+    suggestions.push({
+      type: "warning",
+      title: "No income recorded",
+      description: `You've recorded ₹${Math.round(totalExpenses).toLocaleString("en-IN")} in expenses this month but no income. Make sure to log all your income sources.`,
     })
   }
 

@@ -12,6 +12,7 @@ export type Transaction = {
   description: string | null
   date: string
   created_at: string
+  is_recurring?: boolean
 }
 
 export type Budget = {
@@ -32,9 +33,49 @@ export type CategoryBreakdown = {
   total: number
 }
 
+export type Goal = {
+  id: number
+  name: string
+  target_amount: string
+  current_amount: string
+  deadline: string | null
+  icon: string
+  created_at: string
+}
+
+export type Bill = {
+  id: number
+  name: string
+  amount: string
+  due_date: string
+  is_paid: boolean
+  category: string | null
+  is_recurring: boolean
+  created_at: string
+}
+
+export type NetWorthEntry = {
+  id: number
+  entry_date: string
+  assets: string
+  liabilities: string
+  notes: string | null
+  created_at: string
+}
+
+// ─── Transactions ───────────────────────────────────────
+
+// Helper to normalize Neon DATE columns (returned as Date objects) to YYYY-MM-DD strings
+function normDate(d: unknown): string {
+  if (!d) return ""
+  if (typeof d === "string") return d.split("T")[0]
+  if (d instanceof Date) return d.toISOString().split("T")[0]
+  return String(d).split("T")[0]
+}
+
 export async function getTransactions(): Promise<Transaction[]> {
   const rows = await sql`SELECT * FROM transactions ORDER BY date DESC, created_at DESC`
-  return rows as Transaction[]
+  return rows.map((t) => ({ ...t, date: normDate(t.date) }) as unknown as Transaction)
 }
 
 export async function addTransaction(data: {
@@ -43,10 +84,11 @@ export async function addTransaction(data: {
   amount: number
   description: string
   date: string
+  is_recurring?: boolean
 }) {
   await sql`
-    INSERT INTO transactions (type, category, amount, description, date)
-    VALUES (${data.type}, ${data.category}, ${data.amount}, ${data.description}, ${data.date})
+    INSERT INTO transactions (type, category, amount, description, date, is_recurring)
+    VALUES (${data.type}, ${data.category}, ${data.amount}, ${data.description}, ${data.date}, ${data.is_recurring ?? false})
   `
   revalidatePath("/")
 }
@@ -55,6 +97,8 @@ export async function deleteTransaction(id: number) {
   await sql`DELETE FROM transactions WHERE id = ${id}`
   revalidatePath("/")
 }
+
+// ─── Monthly Stats ───────────────────────────────────────
 
 export async function getMonthlyStats(): Promise<MonthlyStats[]> {
   const rows = await sql`
@@ -83,11 +127,10 @@ export async function getCategoryBreakdown(): Promise<CategoryBreakdown[]> {
     GROUP BY category
     ORDER BY total DESC
   `
-  return rows.map((r) => ({
-    category: r.category as string,
-    total: Number(r.total),
-  }))
+  return rows.map((r) => ({ category: r.category as string, total: Number(r.total) }))
 }
+
+// ─── Budgets ────────────────────────────────────────────
 
 export async function getBudgets(): Promise<Budget[]> {
   const rows = await sql`SELECT * FROM budgets ORDER BY category ASC`
@@ -108,6 +151,8 @@ export async function deleteBudget(id: number) {
   revalidatePath("/")
 }
 
+// ─── Suggestions ────────────────────────────────────────
+
 export async function getSuggestions(): Promise<Suggestion[]> {
   const transactions = await sql`SELECT * FROM transactions ORDER BY date DESC`
   const budgets = await sql`SELECT * FROM budgets`
@@ -118,7 +163,7 @@ export async function getSuggestions(): Promise<Suggestion[]> {
     category: t.category as string,
     amount: Number(t.amount),
     description: t.description as string | null,
-    date: typeof t.date === "string" ? t.date : new Date(t.date as string).toISOString().split("T")[0],
+    date: normDate(t.date),
   }))
 
   const bdgs = budgets.map((b) => ({
@@ -129,6 +174,8 @@ export async function getSuggestions(): Promise<Suggestion[]> {
 
   return generateSuggestions(txns, bdgs)
 }
+
+// ─── Dashboard Summary ─────────────────────────────────
 
 export async function getDashboardSummary() {
   const now = new Date()
@@ -154,11 +201,110 @@ export async function getDashboardSummary() {
   `
 
   return {
-    totalIncome: Number(totals[0]?.total_income || 0),
-    totalExpenses: Number(totals[0]?.total_expenses || 0),
-    netBalance: Number(totals[0]?.total_income || 0) - Number(totals[0]?.total_expenses || 0),
-    monthExpenses: Number(monthTotals[0]?.month_expenses || 0),
-    monthIncome: Number(monthTotals[0]?.month_income || 0),
-    recentTransactions: recentTxns as Transaction[],
+    totalIncome:       Number(totals[0]?.total_income || 0),
+    totalExpenses:     Number(totals[0]?.total_expenses || 0),
+    netBalance:        Number(totals[0]?.total_income || 0) - Number(totals[0]?.total_expenses || 0),
+    monthExpenses:     Number(monthTotals[0]?.month_expenses || 0),
+    monthIncome:       Number(monthTotals[0]?.month_income || 0),
+    recentTransactions: recentTxns.map((t) => ({ ...t, date: normDate(t.date) }) as unknown as Transaction),
   }
+}
+
+// ─── Goals ──────────────────────────────────────────────
+
+export async function getGoals(): Promise<Goal[]> {
+  try {
+    const rows = await sql`SELECT * FROM goals ORDER BY created_at DESC`
+    return rows.map((g) => ({ ...g, deadline: g.deadline ? normDate(g.deadline) : null }) as unknown as Goal)
+  } catch { return [] }
+}
+
+export async function addGoal(data: {
+  name: string
+  target_amount: number
+  current_amount: number
+  deadline?: string | null
+  icon?: string
+}): Promise<Goal> {
+  const rows = await sql`
+    INSERT INTO goals (name, target_amount, current_amount, deadline, icon)
+    VALUES (${data.name}, ${data.target_amount}, ${data.current_amount}, ${data.deadline ?? null}, ${data.icon ?? "target"})
+    RETURNING *
+  `
+  revalidatePath("/")
+  return rows[0] as Goal
+}
+
+export async function updateGoalAmount(id: number, current_amount: number) {
+  await sql`UPDATE goals SET current_amount = ${current_amount} WHERE id = ${id}`
+  revalidatePath("/")
+}
+
+export async function deleteGoal(id: number) {
+  await sql`DELETE FROM goals WHERE id = ${id}`
+  revalidatePath("/")
+}
+
+// ─── Bills ──────────────────────────────────────────────
+
+export async function getBills(): Promise<Bill[]> {
+  try {
+    const rows = await sql`SELECT * FROM bills ORDER BY due_date ASC`
+    return rows.map((b) => ({ ...b, due_date: normDate(b.due_date) }) as unknown as Bill)
+  } catch { return [] }
+}
+
+export async function addBill(data: {
+  name: string
+  amount: number
+  due_date: string
+  category?: string | null
+  is_recurring?: boolean
+}): Promise<Bill> {
+  const rows = await sql`
+    INSERT INTO bills (name, amount, due_date, category, is_recurring)
+    VALUES (${data.name}, ${data.amount}, ${data.due_date}, ${data.category ?? null}, ${data.is_recurring ?? false})
+    RETURNING *
+  `
+  revalidatePath("/")
+  return rows[0] as Bill
+}
+
+export async function markBillPaid(id: number, isPaid: boolean) {
+  await sql`UPDATE bills SET is_paid = ${isPaid} WHERE id = ${id}`
+  revalidatePath("/")
+}
+
+export async function deleteBill(id: number) {
+  await sql`DELETE FROM bills WHERE id = ${id}`
+  revalidatePath("/")
+}
+
+// ─── Net Worth ───────────────────────────────────────────
+
+export async function getNetWorthEntries(): Promise<NetWorthEntry[]> {
+  try {
+    const rows = await sql`SELECT * FROM net_worth_entries ORDER BY entry_date ASC`
+    return rows.map((r) => ({ ...r, entry_date: normDate(r.entry_date) }) as unknown as NetWorthEntry)
+  } catch { return [] }
+}
+
+export async function upsertNetWorthEntry(data: {
+  entry_date: string
+  assets: number
+  liabilities: number
+  notes?: string | null
+}) {
+  await sql`
+    INSERT INTO net_worth_entries (entry_date, assets, liabilities, notes)
+    VALUES (${data.entry_date}, ${data.assets}, ${data.liabilities}, ${data.notes ?? null})
+    ON CONFLICT (entry_date) DO UPDATE
+      SET assets = ${data.assets}, liabilities = ${data.liabilities}, notes = ${data.notes ?? null}
+  `
+  revalidatePath("/")
+}
+
+export async function deleteNetWorthEntry(id: number) {
+  await sql`DELETE FROM net_worth_entries WHERE id = ${id}`
+  revalidatePath("/")
 }
