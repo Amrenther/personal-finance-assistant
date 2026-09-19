@@ -8,9 +8,11 @@
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-> **FinTrack** is a modern, full-stack personal finance and wealth management platform built with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Neon Serverless PostgreSQL**. It features a glassmorphism fintech dashboard, dark/light theme switching, a mathematical Financial Health Scoring engine, heuristic financial advisory insights, goal tracking, bill reminders, and net worth analysis.
+> > **FinTrack** is a modern, full-stack personal finance and wealth management platform built with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, **Tailwind CSS v4**, and **Neon Serverless PostgreSQL**.
 
-🔗 **Live Production Application:** [https://v0-personal-finance-assistant-omega.vercel.app/](https://v0-personal-finance-assistant-omega.vercel.app/)  
+> **FinTrack is an independently designed and developed project by Amrenther.**
+
+🔗 **Live Production Application:** [https://v0-personal-finance-assistant-omega.vercel.app/](https://finance-assistant-v2.vercel.app/)  
 📁 **GitHub Repository:** [https://github.com/Amrenther/personal-finance-assistant](https://github.com/Amrenther/personal-finance-assistant)
 
 ---
